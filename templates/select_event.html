@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Event</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ev.css') }}">
+    <style>
+      .event-select { margin-top: 20px; }
+      .event-card { cursor: pointer; }
+      .event-card input[type='radio'] { margin-top: 10px; }
+      .action-buttons { margin-top: 20px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="nav-buttons">
+            <a href="{{ url_for('select_event') }}" class="nav-btn selected">Select Event</a>
+            <a href="{{ url_for('my_bookings') }}" class="nav-btn">My Bookings</a>
+            <a href="{{ url_for('logout') }}" class="nav-btn">Logout</a>
+        </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('select_event') }}" class="event-select" id="eventForm">
+        <input type="hidden" name="event_name" id="event_name" required>
+        <div class="event-categories">
+            <div class="event-card" data-event="Wedding Event" role="button" tabindex="0" aria-label="Wedding Event">
+                <img src="{{ url_for('static', filename='images/Wedding_Event.jpg') }}" alt="Wedding Event">
+                <p>Wedding Event</p>
+            </div>
+
+            <div class="event-card" data-event="Birthday Party" role="button" tabindex="0" aria-label="Birthday Party">
+                <img src="{{ url_for('static', filename='images/birthday_party.jpg') }}" alt="Birthday Party">
+                <p>Birthday Party</p>
+            </div>
+
+            <div class="event-card" data-event="Success Party" role="button" tabindex="0" aria-label="Success Party">
+                <img src="{{ url_for('static', filename='images/Success_Party.jpg') }}" alt="Success Party">
+                <p>Success Party</p>
+            </div>
+
+            <div class="event-card" data-event="Anniversary Party" role="button" tabindex="0" aria-label="Anniversary Party">
+                <img src="{{ url_for('static', filename='images/Annivarsary.jpg') }}" alt="Anniversary Party">
+                <p>Anniversary Party</p>
+            </div>
+
+            <div class="event-card" data-event="Corporate Event" role="button" tabindex="0" aria-label="Corporate Event">
+                <img src="{{ url_for('static', filename='images/Corporate_Event.jpg') }}" alt="Corporate Event">
+                <p>Corporate Event</p>
+            </div>
+
+            <div class="event-card" data-event="Engagement Event" role="button" tabindex="0" aria-label="Engagement Event">
+                <img src="{{ url_for('static', filename='images/Engagement.jpg') }}" alt="Engagement Event">
+                <p>Engagement Event</p>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button type="submit" id="nextBtn" disabled>Next</button>
+        </div>
+    </form>
+</div>
+<script src="{{ url_for('static', filename='Js/select_event.js') }}"></script>
+</body>
+</html>

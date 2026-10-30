@@ -1,0 +1,51 @@
+body {
+    font-family: Arial;
+    background: #eef1f5;
+}
+
+.container {
+    width: 90%;
+    max-width: 450px;
+    background: white;
+    margin: auto;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+h2 {
+    text-align: center;
+}
+
+.upi-box {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.qr {
+    width: 200px;
+    margin: 10px 0;
+}
+
+input {
+    width: 90%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: #007bff;
+    color: white;
+    border-radius: 6px;
+    border: none;
+    margin-top: 20px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+button:hover {
+    background: #0056b3;
+}

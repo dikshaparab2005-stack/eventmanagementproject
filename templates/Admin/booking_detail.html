@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking #{{ booking.id }}</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Karla:wght@300;400;600;700&family=Playfair+Display:wght@500;700&display=swap");
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --card: #0b1220;
+      --accent: #f59e0b;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: rgba(148, 163, 184, 0.2);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Karla", sans-serif;
+      background: radial-gradient(circle at top left, #1f2937, #0f172a 45%);
+      color: var(--text);
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      min-height: 100vh;
+    }
+    .sidebar {
+      background: linear-gradient(160deg, rgba(178, 6, 197, 0.532) 0%, rgb(190, 166, 190) 60%);
+      padding: 28px 18px;
+      border-right: 1px solid var(--border);
+    }
+    .brand {
+      font-family: "Playfair Display", serif;
+      font-size: 22px;
+      margin-bottom: 26px;
+    }
+    .nav a {
+      display: block;
+      color: var(--text);
+      text-decoration: none;
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-bottom: 6px;
+      transition: all 0.2s ease;
+    }
+    .nav a:hover { background: rgba(255, 255, 255, 0.06); }
+    .nav a.active {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fef3c7;
+    }
+    .content { padding: 32px; }
+    .panel {
+      background: var(--panel);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .label { color: var(--muted); font-size: 12px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+    th, td {
+      text-align: left;
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    th { color: var(--muted); }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.2);
+      color: #bae6fd;
+      font-weight: 600;
+      font-size: 12px;
+    }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: sticky; top: 0; z-index: 2; }
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">Event Admin</div>
+    <nav class="nav">
+      <a href="{{ url_for('admin.admin_dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('admin.manage_food') }}">Manage Food</a>
+      <a class="active" href="{{ url_for('admin.view_bookings') }}">Bookings</a>
+      <a href="{{ url_for('home') }}">Logout</a>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <div class="panel">
+      <h2 style="margin:0;">Booking #{{ booking.id }}</h2>
+      <div class="grid" style="margin-top:12px;">
+        <div>
+          <div class="label">User</div>
+          <div>{{ booking.user_name }}</div>
+          <div class="label">{{ booking.user_email }}</div>
+          <div class="label">{{ booking.user_number }}</div>
+        </div>
+        <div>
+          <div class="label">Address</div>
+          <div>{{ booking.user_address }}</div>
+        </div>
+        <div>
+          <div class="label">Event</div>
+          <div><span class="badge">{{ booking.event_name }}</span></div>
+          <div class="label" style="margin-top:8px;">Event Date</div>
+          <div>{{ booking.event_date }}</div>
+          <div class="label" style="margin-top:8px;">Booked At</div>
+          <div>{{ booking.booking_date }}</div>
+        </div>
+        <div>
+          <div class="label">Summary</div>
+          <div>{{ booking.total_items }} items</div>
+          <div>Total Payment: ₹{{ booking.total_amount }}</div>
+          <div class="label" style="margin-top:8px;">Payment Status</div>
+          <div>{{ booking.payment_status }}</div>
+        </div>
+        <div>
+          <div class="label">Venue</div>
+          <div>{{ booking.venue_name }}</div>
+          <div class="label">{{ booking.venue_location }}</div>
+          <div class="label">Capacity: {{ booking.venue_capacity }}</div>
+        </div>
+        <div>
+          <div class="label">Decoration Theme</div>
+          <div>{{ booking.decoration_theme }}</div>
+          <div class="label" style="margin-top:8px;">Guest Count</div>
+          <div>{{ booking.guest_count }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3 style="margin:0;">Items</h3>
+      {% if booking.booking_items %}
+      <table>
+        <thead>
+          <tr>
+            <th>Food</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Qty</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in booking.booking_items %}
+          <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.category }}</td>
+            <td>₹{{ item.price }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>₹{{ item.subtotal }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="label" style="margin-top:10px;">No items found for this booking.</div>
+      {% endif %}
+    </div>
+  </main>
+</div>
+</body>
+</html>

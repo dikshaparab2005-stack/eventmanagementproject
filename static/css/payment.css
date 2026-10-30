@@ -1,0 +1,45 @@
+body {
+    font-family: Arial;
+    background: #e9ecef;
+}
+
+.container {
+    width: 90%;
+    max-width: 500px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+h2, h3 {
+    text-align: center;
+}
+
+.card {
+    background: #f7f7f7;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #1e7e34;
+}
+
+.note {
+    font-size: 14px;
+    text-align: center;
+    margin-top: 10px;
+}

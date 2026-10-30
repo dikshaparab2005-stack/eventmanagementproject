@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/booking.css') }}">
+</head>
+<body>
+
+<div class="container">
+
+    <h2>Event Booking Summary</h2>
+
+    <!-- UPDATED FORM (connected to Python backend) -->
+    <form id="bookingForm" action="{{ url_for('payment_page') }}" method="POST">
+        <input type="hidden" id="bookingId" name="booking_id" value="{{ booking.id if booking else session.get('current_booking_id', '') }}">
+
+        <label>Your Name</label>
+        <input type="text" id="name" name="full_name" placeholder="Enter your name" required value="{{ booking.user_name if booking else '' }}" pattern="[A-Za-z ]{3,}" minlength="3" title="Only letters and spaces, minimum 3 characters">
+
+        <label>Mobile Number</label>
+        <input type="tel" id="mobile" name="mobile_no" placeholder="Enter your number" required value="{{ booking.user_number if booking else '' }}" pattern="[6-9][0-9]{9}" maxlength="10" inputmode="numeric" title="Ensure your number starts with 6-9 and contains exactly 10 digits">
+
+        <label>Email</label>
+        <input type="email" id="email" name="email" placeholder="Enter your email" required value="{{ booking.user_email if booking else '' }}" pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" title="Enter a valid email with @ and domain">
+
+        <label>Event Date</label>
+        <input type="date" id="date" name="date" required value="{{ booking.event_date if booking else '' }}">
+
+        <label>Selected Event</label>
+        <input type="text" id="eventName" name="event_name" readonly value="{{ booking.event_name if booking else '' }}">
+
+        <label>Food Price</label>
+        <input type="text" id="foodPrice" name="food_items" readonly value="{{ booking.food_price if booking else '' }}">
+
+        <label>Venue Price</label>
+        <input type="text" id="venuePrice" name="venue" readonly value="{{ booking.venue_price if booking else '' }}">
+
+        <input type="hidden" id="venueName" name="venue_name" value="{{ booking.venue_name if booking else '' }}">
+        <input type="hidden" id="venueLocation" name="venue_location" value="{{ booking.venue_location if booking else '' }}">
+        <input type="hidden" id="venueCapacity" name="venue_capacity" value="{{ booking.venue_capacity if booking else '' }}">
+
+        <label>Decoration Price</label>
+        <input type="text" id="decorationPrice" name="decoration" readonly value="{{ booking.decoration_price if booking else '' }}">
+
+        <input type="hidden" id="decorationTheme" name="decoration_theme" value="{{ booking.decoration_theme if booking else '' }}">
+        <input type="hidden" id="decorationRequirements" name="decoration_requirements" value="{{ booking.decoration_requirements if booking else '' }}">
+
+        <label>Guest Count</label>
+        <input type="number" id="guests" name="guest_count" placeholder="Enter number of guests" required value="{{ booking.guest_count if booking else '' }}" min="10" max="10000">
+
+        <label>Service Charge</label>
+        <input type="text" id="serviceCharge" name="service_charge" readonly value="{{ booking.service_charge if booking else '' }}">
+
+        <h3>Total Price: ₹ <span id="totalPrice">0</span></h3>
+
+        <!-- SUBMIT BUTTON sends data to database -->
+        <button type="submit" id="bookBtn">Book Now</button>
+
+        <!-- (Optional) Update / Delete Buttons -->
+        <button type="button" id="updateBtn" class="yellowBtn">Update Booking</button>
+        <button type="button" id="deleteBtn" class="redBtn">Delete Order</button>
+
+    </form>
+
+   
+
+</div>
+
+<script src="{{ url_for('static', filename='Js/booking.js') }}"></script>
+<script>
+  (function () {
+    const dateInput = document.getElementById("date");
+    if (!dateInput) return;
+    const now = new Date();
+    now.setDate(now.getDate() + 2);
+    const minDate = now.toISOString().split("T")[0];
+    dateInput.min = minDate;
+    if (dateInput.value && dateInput.value < minDate) {
+      dateInput.value = "";
+    }
+  })();
+</script>
+<script>
+  (function () {
+    const mobileInput = document.getElementById("mobile");
+    if (!mobileInput) return;
+    const pattern = /^[6-9][0-9]{9}$/;
+    mobileInput.addEventListener("blur", () => {
+      const value = (mobileInput.value || "").trim();
+      if (!value) {
+        mobileInput.setCustomValidity("");
+        return;
+      }
+      if (!pattern.test(value)) {
+        mobileInput.setCustomValidity("Enter a valid 10-digit Indian mobile number starting with 6-9.");
+      } else {
+        mobileInput.setCustomValidity("");
+      }
+    });
+  })();
+</script>
+<script>
+  (function () {
+    const nameInput = document.getElementById("name");
+    const emailInput = document.getElementById("email");
+    const guestInput = document.getElementById("guests");
+
+    if (nameInput) {
+      const namePattern = /^[A-Za-z ]{3,}$/;
+      nameInput.addEventListener("blur", () => {
+        const value = (nameInput.value || "").trim();
+        if (!value) {
+          nameInput.setCustomValidity("");
+          return;
+        }
+        if (!namePattern.test(value)) {
+          nameInput.setCustomValidity("Only letters and spaces, minimum 3 characters.");
+        } else {
+          nameInput.setCustomValidity("");
+        }
+      });
+    }
+
+    if (emailInput) {
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      emailInput.addEventListener("blur", () => {
+        const value = (emailInput.value || "").trim();
+        if (!value) {
+          emailInput.setCustomValidity("");
+          return;
+        }
+        if (!emailPattern.test(value)) {
+          emailInput.setCustomValidity("Email must include @ and a valid domain, no spaces.");
+        } else {
+          emailInput.setCustomValidity("");
+        }
+      });
+    }
+
+    if (guestInput) {
+      const minGuests = 10;
+      const maxGuests = 10000;
+      guestInput.addEventListener("blur", () => {
+        const value = Number(guestInput.value);
+        if (!guestInput.value) {
+          guestInput.setCustomValidity("");
+          return;
+        }
+        if (!Number.isFinite(value) || value < minGuests || value > maxGuests) {
+          guestInput.setCustomValidity(`Guest count must be between ${minGuests} and ${maxGuests}.`);
+        } else {
+          guestInput.setCustomValidity("");
+        }
+      });
+    }
+  })();
+</script>
+</body>
+</html>

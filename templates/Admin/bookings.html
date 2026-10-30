@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Bookings</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Karla:wght@300;400;600;700&family=Playfair+Display:wght@500;700&display=swap");
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --card: #0b1220;
+      --accent: #f59e0b;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: rgba(148, 163, 184, 0.2);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Karla", sans-serif;
+      background: radial-gradient(circle at top left, #1f2937, #0f172a 45%);
+      color: var(--text);
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      min-height: 100vh;
+    }
+    .sidebar {
+      background:linear-gradient(160deg, rgba(178, 6, 197, 0.532) 0%, rgb(190, 166, 190) 60%);
+      padding: 28px 18px;
+      border-right: 1px solid var(--border);
+    }
+    .brand {
+      font-family: "Playfair Display", serif;
+      font-size: 22px;
+      margin-bottom: 26px;
+    }
+    .nav a {
+      display: block;
+      color: var(--text);
+      text-decoration: none;
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-bottom: 6px;
+      transition: all 0.2s ease;
+    }
+    .nav a:hover { background: rgba(255, 255, 255, 0.06); }
+    .nav a.active {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fef3c7;
+    }
+    .content { padding: 32px; }
+    .panel {
+      background: var(--panel);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      padding: 18px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+    th, td {
+      text-align: left;
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    th { color: var(--muted); }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.2);
+      color: #bae6fd;
+      font-weight: 600;
+      font-size: 12px;
+    }
+    .subtext {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    .empty { color: var(--muted); padding: 12px 0; }
+    .btn-view {
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      background: rgba(245, 158, 11, 0.15);
+      color: #fef3c7;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-view:hover { background: rgba(245, 158, 11, 0.25); }
+    .btn-delete {
+      border: 1px solid rgba(248, 113, 113, 0.5);
+      background: rgba(248, 113, 113, 0.18);
+      color: #fee2e2;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-delete:hover { background: rgba(248, 113, 113, 0.3); }
+    .actions {
+      display: inline-flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 50;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal {
+      width: min(960px, 100%);
+      max-height: 85vh;
+      overflow: auto;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+      padding: 20px;
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .modal-title { margin: 0; }
+    .modal-close {
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+    .modal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .info-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .info-label { color: var(--muted); font-size: 12px; }
+    .divider { height: 1px; background: var(--border); margin: 16px 0; }
+    .loading {
+      padding: 14px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .category-title { margin: 8px 0 4px; color: var(--muted); font-size: 13px; }
+    @media (max-width: 900px) {
+      .modal { max-height: 90vh; }
+    }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: sticky; top: 0; z-index: 2; }
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">Event Admin</div>
+    <nav class="nav">
+      <a href="{{ url_for('admin.admin_dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('admin.manage_food') }}">Manage Food</a>
+      <a class="active" href="{{ url_for('admin.view_bookings') }}">Bookings</a>
+     <a href="{{ url_for('home') }}">Logout</a>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <div class="panel">
+      <h2 style="margin:0;">All Bookings</h2>
+      {% if bookings %}
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>User</th>
+            <th>Event Name</th>
+            <th>Booking Date & Time</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for booking in bookings %}
+          <tr>
+            <td>
+              #{{ booking.id }}
+            </td>
+            <td>
+              <div>{{ booking.user_name }}</div>
+              <span class="subtext">{{ booking.user_email or '-' }}</span>
+            </td>
+            <td><span class="badge">{{ booking.event_name }}</span></td>
+            <td>{{ booking.booking_date or '-' }}</td>
+            <td>
+              <div class="actions">
+                <button class="btn-view" data-booking-id="{{ booking.id }}">View Full Details</button>
+                <form method="POST" action="{{ url_for('admin.delete_booking', booking_id=booking.id) }}"
+                      onsubmit="return confirm(' Are you sure you want to delete this booking.');">
+                  <button class="btn-delete" type="submit">Delete</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">No bookings found.</div>
+      {% endif %}
+    </div>
+  </main>
+</div>
+
+<div class="modal-backdrop" id="bookingModal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modalTitle">Booking Details</h3>
+      <button class="modal-close" id="modalClose">Close</button>
+    </div>
+    <div id="modalBody" class="loading">Loading booking details...</div>
+  </div>
+</div>
+
+<script>
+  const modal = document.getElementById("bookingModal");
+  const modalBody = document.getElementById("modalBody");
+  const modalTitle = document.getElementById("modalTitle");
+  const closeBtn = document.getElementById("modalClose");
+
+  function openModal() {
+    modal.classList.add("show");
+    modal.setAttribute("aria-hidden", "false");
+  }
+
+  function closeModal() {
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden", "true");
+  }
+
+  closeBtn.addEventListener("click", closeModal);
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  function fmtMoney(value) {
+    const num = Number(value || 0);
+    return `₹${num.toFixed(2)}`;
+  }
+
+  function displayValue(value) {
+    if (value === null || value === undefined || value === "") {
+      return "-";
+    }
+    return value;
+  }
+
+  function renderItems(grouped) {
+    const categories = Object.keys(grouped || {});
+    if (!categories.length) {
+      return "<div class='info-label'>No food items selected.</div>";
+    }
+    return categories.map((category) => {
+      const rows = grouped[category] || [];
+      const itemsHtml = rows.map((item) => `
+        <tr>
+          <td>${item.name || "Unknown"}</td>
+          <td>${item.quantity || 0}</td>
+          <td>${fmtMoney(item.price)}</td>
+          <td>${fmtMoney(item.subtotal)}</td>
+        </tr>
+      `).join("");
+      return `
+        <div class="category-title">${category}</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Qty</th>
+              <th>Price</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHtml}
+          </tbody>
+        </table>
+      `;
+    }).join("");
+  }
+
+  function renderDecorationRequirements(raw) {
+    if (!raw) return "<div class='info-label'>No decoration requirements selected.</div>";
+    let data;
+    try {
+      data = typeof raw === "string" ? JSON.parse(raw) : raw;
+    } catch (e) {
+      return `<div class='info-label'>${String(raw)}</div>`;
+    }
+    if (!data) return "<div class='info-label'>No decoration requirements selected.</div>";
+
+    const lines = [];
+    if (data.color) lines.push(`Color Theme: ${data.color}`);
+    if (data.lighting && data.lighting !== "none") lines.push(`Lighting: ${data.lighting}`);
+    if (data.stage) lines.push(`Stage: ${data.stage}`);
+    if (data.flower) lines.push(`Flowers: ${data.flower}`);
+    if (data.table) lines.push(`Tables: ${data.table}`);
+    if (data.entry) lines.push(`Entry: ${data.entry}`);
+    if (data.backdrop) lines.push(`Backdrop: ${data.backdrop}`);
+    if (data.balloon) lines.push(`Balloons: ${data.balloon}`);
+    if (data.estimatedTotal) lines.push(`Estimated Total: ${data.estimatedTotal}`);
+
+    if (!lines.length) {
+      return "<div class='info-label'>No decoration requirements selected.</div>";
+    }
+    return `<ul>${lines.map((line) => `<li>${line}</li>`).join("")}</ul>`;
+  }
+
+  async function loadBookingDetails(bookingId) {
+    modalTitle.textContent = `Booking #${bookingId}`;
+    modalBody.innerHTML = "Loading booking details...";
+    openModal();
+    try {
+      const res = await fetch(`/admin/bookings/${bookingId}/json`);
+      const data = await res.json();
+      if (!res.ok) {
+        modalBody.innerHTML = data.error || "Failed to load booking details.";
+        return;
+      }
+
+      const infoHtml = `
+        <div class="modal-grid">
+          <div class="info-card">
+            <div class="info-label">Event</div>
+            <div>${displayValue(data.event_name)}</div>
+            <div class="info-label" style="margin-top:8px;">Event Date</div>
+            <div>${displayValue(data.event_date)}</div>
+          </div>
+          <div class="info-card">
+            <div class="info-label">Guest Count</div>
+            <div>${displayValue(data.guest_count)}</div>
+            <div class="info-label" style="margin-top:8px;">Venue</div>
+            <div>${displayValue(data.venue_name)}</div>
+            <div class="info-label" style="margin-top:8px;">Decoration Theme</div>
+            <div>${displayValue(data.decoration_theme)}</div>
+          </div>
+          <div class="info-card">
+            <div class="info-label">Payment Status</div>
+            <div>${data.payment_status || "Pending"}</div>
+            <div class="info-label" style="margin-top:8px;">Total Payment</div>
+            <div>${fmtMoney(data.total_amount)}</div>
+            <div class="info-label" style="margin-top:8px;">Advance Amount</div>
+            <div>${fmtMoney(data.advance_amount)}</div>
+            <div class="info-label" style="margin-top:8px;">Remaining Amount</div>
+            <div>${fmtMoney(data.remaining_amount)}</div>
+            <div class="info-label" style="margin-top:8px;">Transaction ID</div>
+            <div>${displayValue(data.transaction_id)}</div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <h4 style="margin:0 0 8px;">Selected Food Items</h4>
+        ${renderItems(data.items_by_category)}
+        <div class="divider"></div>
+        <h4 style="margin:0 0 8px;">Decoration Requirements</h4>
+        ${renderDecorationRequirements(data.decoration_requirements)}
+      `;
+      modalBody.innerHTML = infoHtml;
+    } catch (err) {
+      modalBody.innerHTML = "Could not load booking details.";
+    }
+  }
+
+  document.querySelectorAll(".btn-view").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const bookingId = btn.getAttribute("data-booking-id");
+      if (bookingId) loadBookingDetails(bookingId);
+    });
+  });
+</script>
+</body>
+</html>

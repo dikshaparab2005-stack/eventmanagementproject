@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Update Food Items</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/food.css') }}">
+  <style>
+    .dish-item { display: flex; gap: 10px; margin: 5px 0; }
+    .dish-item select { flex: 1; padding: 6px; }
+    input[type="number"] { width: 50px; }
+    .summary table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    .summary th, .summary td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    .remove-btn {
+      background: #e53935;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Update Food Items</h2>
+
+  <form method="POST" id="foodForm" action="{{ url_for('update_food', booking_id=booking_id) }}">
+    <input type="hidden" name="booking_id" value="{{ booking_id }}">
+    <div id="hiddenInputs"></div>
+
+    {% set preferred = ['Startup', 'Main', 'Dessert'] %}
+
+    {% for cat in preferred %}
+      {% set cat_items = foods|selectattr('category', 'equalto', cat)|list %}
+      {% if cat_items %}
+      <div class="section" id="{{ cat|lower|replace(' ', '-') }}Section">
+        <h3>{{ cat }}</h3>
+        <div class="dish-item">
+          <select class="food-select" data-category="{{ cat }}">
+            <option value="">Select {{ cat }} item</option>
+            {% for food in cat_items %}
+            <option value="{{ food.id }}" data-price="{{ food.price }}" data-name="{{ food.name }}">{{ food.name }} - ₹{{ food.price }}</option>
+            {% endfor %}
+          </select>
+          <input type="number" class="food-qty" min="1" value="1">
+          <button type="button" class="add-btn">Add</button>
+        </div>
+      </div>
+      {% endif %}
+    {% endfor %}
+
+    {% for group in foods|groupby('category') %}
+      {% if group.grouper not in preferred %}
+      <div class="section" id="{{ group.grouper|lower|replace(' ', '-') }}Section">
+        <h3>{{ group.grouper }}</h3>
+        <div class="dish-item">
+          <select class="food-select" data-category="{{ group.grouper }}">
+            <option value="">Select {{ group.grouper }} item</option>
+            {% for food in group.list %}
+            <option value="{{ food.id }}" data-price="{{ food.price }}" data-name="{{ food.name }}">{{ food.name }} - ₹{{ food.price }}</option>
+            {% endfor %}
+          </select>
+          <input type="number" class="food-qty" min="1" value="1">
+          <button type="button" class="add-btn">Add</button>
+        </div>
+      </div>
+      {% endif %}
+    {% endfor %}
+
+    <!-- Order Summary -->
+    <div class="summary">
+      <h3>Order Summary</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Dish</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="orderTableBody">
+          <tr><td colspan="6" style="text-align:center;">No items selected</td></tr>
+        </tbody>
+      </table>
+      <h2>Grand Total: ₹<span id="grandTotal">0</span></h2>
+    </div>
+
+    <div class="buttons">
+      <button type="submit">Save Food Changes</button>
+    </div>
+
+  </form>
+</div>
+
+<script>
+  const orderTableBody = document.getElementById("orderTableBody");
+  const grandTotalEl = document.getElementById("grandTotal");
+  const hiddenInputs = document.getElementById("hiddenInputs");
+  const addButtons = document.querySelectorAll(".add-btn");
+  const selections = new Map();
+
+  const existingItems = {{ existing_items|tojson }};
+  existingItems.forEach((item) => {
+    selections.set(String(item.id), {
+      id: String(item.id),
+      name: item.name,
+      price: Number(item.price || 0),
+      category: item.category || "",
+      qty: Number(item.qty || 0),
+    });
+  });
+
+  addButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const wrapper = btn.closest(".dish-item");
+      const select = wrapper.querySelector(".food-select");
+      const qtyInput = wrapper.querySelector(".food-qty");
+      const option = select.options[select.selectedIndex];
+      const foodId = select.value;
+      const qty = parseInt(qtyInput.value, 10) || 0;
+
+      if (!foodId || qty <= 0) {
+        return;
+      }
+
+      const name = option.dataset.name || option.textContent;
+      const price = parseFloat(option.dataset.price || "0");
+      const category = select.dataset.category || "";
+
+      if (selections.has(foodId)) {
+        const existing = selections.get(foodId);
+        existing.qty += qty;
+        selections.set(foodId, existing);
+      } else {
+        selections.set(foodId, { id: foodId, name, price, category, qty });
+      }
+
+      qtyInput.value = 1;
+      select.selectedIndex = 0;
+      updateOrder();
+    });
+  });
+
+  function updateOrder() {
+    let grandTotal = 0;
+    let rows = [];
+    hiddenInputs.innerHTML = "";
+
+    selections.forEach((item) => {
+      const subtotal = item.price * item.qty;
+      grandTotal += subtotal;
+
+      rows.push(`
+        <tr>
+          <td>${item.category}</td>
+          <td>${item.name}</td>
+          <td>₹${item.price}</td>
+          <td>
+            <input type="number" class="qty-edit" data-id="${item.id}" min="1" value="${item.qty}">
+          </td>
+          <td>₹${subtotal}</td>
+          <td><button type="button" class="remove-btn" data-id="${item.id}">Remove</button></td>
+        </tr>
+      `);
+
+      const foodInput = document.createElement("input");
+      foodInput.type = "hidden";
+      foodInput.name = "food_id[]";
+      foodInput.value = item.id;
+      hiddenInputs.appendChild(foodInput);
+
+      const qtyInput = document.createElement("input");
+      qtyInput.type = "hidden";
+      qtyInput.name = "quantity[]";
+      qtyInput.value = item.qty;
+      hiddenInputs.appendChild(qtyInput);
+    });
+
+    orderTableBody.innerHTML = rows.length ? rows.join("") :
+      '<tr><td colspan="6" style="text-align:center;">No items selected</td></tr>';
+
+    grandTotalEl.textContent = grandTotal;
+
+    document.querySelectorAll(".remove-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-id");
+        selections.delete(id);
+        updateOrder();
+      });
+    });
+
+    document.querySelectorAll(".qty-edit").forEach((input) => {
+      input.addEventListener("input", () => {
+        const id = input.getAttribute("data-id");
+        const qty = parseInt(input.value, 10) || 0;
+        if (!selections.has(id)) return;
+        if (qty <= 0) {
+          selections.delete(id);
+        } else {
+          const existing = selections.get(id);
+          existing.qty = qty;
+          selections.set(id, existing);
+        }
+        updateOrder();
+      });
+    });
+  }
+
+  updateOrder();
+</script>
+
+</body>
+</html>

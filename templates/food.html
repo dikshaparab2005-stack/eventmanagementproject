@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maharashtra Event Menu</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/food.css') }}">
+  <style>
+    .dish-item { display: flex; gap: 10px; margin: 5px 0; }
+    .dish-item select { flex: 1; padding: 6px; }
+    input[type="number"] { width: 50px; }
+    .summary table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    .summary th, .summary td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Event Food Menu</h2>
+
+  <form method="POST" id="foodForm" action="{{ url_for('food') }}">
+    <input type="hidden" name="booking_id" value="{{ booking_id }}">
+    <div id="hiddenInputs"></div>
+
+    {% set preferred = ['Startup', 'Main', 'Dessert'] %}
+
+    {% for cat in preferred %}
+      {% set cat_items = foods|selectattr('category', 'equalto', cat)|list %}
+      {% if cat_items %}
+      <div class="section" id="{{ cat|lower|replace(' ', '-') }}Section">
+        <h3>{{ cat }}</h3>
+        <div class="dish-item">
+          <select class="food-select" data-category="{{ cat }}">
+            <option value="">Select {{ cat }} item</option>
+            {% for food in cat_items %}
+            <option value="{{ food.id }}" data-price="{{ food.price }}" data-name="{{ food.name }}">{{ food.name }} - ₹{{ food.price }}</option>
+            {% endfor %}
+          </select>
+          <input type="number" class="food-qty" min="1" value="1">
+          <button type="button" class="add-btn">Add</button>
+        </div>
+      </div>
+      {% endif %}
+    {% endfor %}
+
+    {% for group in foods|groupby('category') %}
+      {% if group.grouper not in preferred %}
+      <div class="section" id="{{ group.grouper|lower|replace(' ', '-') }}Section">
+        <h3>{{ group.grouper }}</h3>
+        <div class="dish-item">
+          <select class="food-select" data-category="{{ group.grouper }}">
+            <option value="">Select {{ group.grouper }} item</option>
+            {% for food in group.list %}
+            <option value="{{ food.id }}" data-price="{{ food.price }}" data-name="{{ food.name }}">{{ food.name }} - ₹{{ food.price }}</option>
+            {% endfor %}
+          </select>
+          <input type="number" class="food-qty" min="1" value="1">
+          <button type="button" class="add-btn">Add</button>
+        </div>
+      </div>
+      {% endif %}
+    {% endfor %}
+
+    <!-- Order Summary -->
+    <div class="summary">
+      <h3>Order Summary</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Dish</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody id="orderTableBody">
+          <tr><td colspan="5" style="text-align:center;">No items selected</td></tr>
+        </tbody>
+      </table>
+      <h2>Grand Total: ₹<span id="grandTotal">0</span></h2>
+    </div>
+
+    <div class="buttons">
+      <button type="button" onclick="confirmOrder()">Confirm</button>
+      <button type="submit">Next</button>
+    </div>
+
+  </form>
+</div>
+
+<script>
+  const orderTableBody = document.getElementById("orderTableBody");
+  const grandTotalEl = document.getElementById("grandTotal");
+  const foodForm = document.getElementById("foodForm");
+  const hiddenInputs = document.getElementById("hiddenInputs");
+  const addButtons = document.querySelectorAll(".add-btn");
+
+  const selections = new Map();
+
+  foodForm.addEventListener("submit", () => {
+    localStorage.setItem("foodPrice", grandTotalEl.textContent || "0");
+  });
+
+  addButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const wrapper = btn.closest(".dish-item");
+      const select = wrapper.querySelector(".food-select");
+      const qtyInput = wrapper.querySelector(".food-qty");
+      const option = select.options[select.selectedIndex];
+      const foodId = select.value;
+      const qty = parseInt(qtyInput.value, 10) || 0;
+
+      if (!foodId || qty <= 0) {
+        return;
+      }
+
+      const name = option.dataset.name || option.textContent;
+      const price = parseFloat(option.dataset.price || "0");
+      const category = select.dataset.category || "";
+
+      if (selections.has(foodId)) {
+        const existing = selections.get(foodId);
+        existing.qty += qty;
+        selections.set(foodId, existing);
+      } else {
+        selections.set(foodId, { id: foodId, name, price, category, qty });
+      }
+
+      qtyInput.value = 1;
+      select.selectedIndex = 0;
+      updateOrder();
+    });
+  });
+
+  function updateOrder() {
+    let grandTotal = 0;
+    let rows = [];
+    hiddenInputs.innerHTML = "";
+
+    selections.forEach((item) => {
+      const subtotal = item.price * item.qty;
+      grandTotal += subtotal;
+
+      rows.push(`
+        <tr>
+          <td>${item.category}</td>
+          <td>${item.name}</td>
+          <td>₹${item.price}</td>
+          <td>${item.qty}</td>
+          <td>₹${subtotal}</td>
+        </tr>
+      `);
+
+      const foodInput = document.createElement("input");
+      foodInput.type = "hidden";
+      foodInput.name = "food_id[]";
+      foodInput.value = item.id;
+      hiddenInputs.appendChild(foodInput);
+
+      const qtyInput = document.createElement("input");
+      qtyInput.type = "hidden";
+      qtyInput.name = "quantity[]";
+      qtyInput.value = item.qty;
+      hiddenInputs.appendChild(qtyInput);
+    });
+
+    orderTableBody.innerHTML = rows.length ? rows.join("") :
+      '<tr><td colspan="5" style="text-align:center;">No items selected</td></tr>';
+
+    grandTotalEl.textContent = grandTotal;
+  }
+
+  function confirmOrder(){
+    alert("Order confirmed!\nTotal: ₹" + grandTotalEl.textContent);
+  }
+</script>
+
+</body>
+</html>

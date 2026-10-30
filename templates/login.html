@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Page</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="login-container">
+    <h2>Event Management Login</h2>
+   <form id="loginForm" method="POST" action="{{ url_for('login') }}">
+
+  <div class="input-group">
+    <label for="username">Email or Full Name</label>
+    <input type="text" id="username" name="username" placeholder="Enter email or name" required pattern="(^[A-Za-z ]{3,}$)|(^[^\s@]+@[^\s@]+\.[^\s@]+$)" title="Enter a valid full name or email">
+  </div>
+
+  <div class="input-group">
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" placeholder="Enter password" required minlength="6" title="Password must be at least 6 characters">
+  </div>
+
+  <button type="submit">Login</button>
+
+  <div class="input-group"> 
+      <p>Forgot password? <a href="{{ url_for('forget_password') }}">Click here</a></p>
+      <p>New user? <a href="{{ url_for('register') }}">Register</a></p>
+      <p>Admin? <a href="{{ url_for('admin.admin_login') }}">Admin Login</a></p>
+  </div>
+
+</form>
+
+<p id="error-msg"></p>
+  
+  </div>
+  <script src="{{ url_for('static', filename='Js/script.js') }}"></script>
+  <script>
+    (function () {
+      const userInput = document.getElementById("username");
+      const passInput = document.getElementById("password");
+      const namePattern = /^[A-Za-z ]{3,}$/;
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (userInput) {
+        userInput.addEventListener("blur", () => {
+          const value = (userInput.value || "").trim();
+          if (!value) {
+            userInput.setCustomValidity("");
+            return;
+          }
+          if (!namePattern.test(value) && !emailPattern.test(value)) {
+            userInput.setCustomValidity("Enter a valid full name (letters/spaces, min 3) or email.");
+          } else {
+            userInput.setCustomValidity("");
+          }
+        });
+      }
+
+      if (passInput) {
+        passInput.addEventListener("blur", () => {
+          const value = (passInput.value || "").trim();
+          if (!value) {
+            passInput.setCustomValidity("Password cannot be empty.");
+            return;
+          }
+          if (value.length < 6) {
+            passInput.setCustomValidity("Password must be at least 6 characters.");
+          } else {
+            passInput.setCustomValidity("");
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

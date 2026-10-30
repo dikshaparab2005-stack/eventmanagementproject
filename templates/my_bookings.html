@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Bookings</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Karla:wght@300;400;600;700&family=Playfair+Display:wght@600&display=swap");
+    :root {
+      --bg: #f2f5f9;
+      --panel: #ffffff;
+      --card: #ffffff;
+      --accent: #5b6b8a;
+      --text: #0f172a;
+      --muted: #6b7280;
+      --border: rgba(148, 163, 184, 0.35);
+      --sage: #7aa08b;
+      --slate: #5b6b8a;
+      --danger: #b55353;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Karla", sans-serif;
+      background: radial-gradient(circle at top left, #ffffff, #e9eff8 55%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 24px 60px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 10px;
+    }
+    .title {
+      font-family: "Playfair Display", serif;
+      font-size: 30px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+    }
+    .breadcrumb {
+      margin: 4px 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .primary-btn {
+      text-decoration: none;
+      color: #ffffff;
+      padding: 10px 16px;
+      border-radius: 10px;
+      background: var(--slate);
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid rgba(91, 107, 138, 0.4);
+    }
+    .primary-btn:hover { background: #4a5b77; }
+    .secondary-link {
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 16px;
+      border-radius: 10px;
+      background: #7a8aa6;
+      border: 1px solid rgba(122, 138, 166, 0.4);
+    }
+    .secondary-link:hover { background: #6c7b95; }
+    .panel {
+      background: var(--panel);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      padding: 12px;
+      overflow: auto;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 900px; }
+    th, td {
+      padding: 14px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      background: #f3f6fb;
+    }
+    tbody tr:hover { background: #f8fafc; }
+    .num { text-align: right; }
+    .center { text-align: center; }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(91, 107, 138, 0.12);
+      color: #3f4d66;
+      font-weight: 600;
+      font-size: 12px;
+    }
+    .event-strong { font-weight: 700; }
+    .total-strong { font-weight: 700; }
+    .status {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status.pending {
+      background: rgba(217, 119, 6, 0.2);
+      color: #7a4a0f;
+    }
+    .status.paid {
+      background: rgba(122, 160, 139, 0.25);
+      color: #2f523f;
+    }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: #3f4d66;
+      padding: 6px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      box-shadow: none;
+    }
+    .btn.info { border-color: rgba(91, 107, 138, 0.35); }
+    .btn.warn { border-color: rgba(122, 160, 139, 0.45); }
+    .btn.delete {
+      background: #fff5f5;
+      border-color: rgba(181, 83, 83, 0.4);
+      color: #8b3a3a;
+      padding: 6px 12px;
+      min-width: 70px;
+      text-align: center;
+    }
+    form { margin: 0; }
+    .empty {
+      padding: 24px;
+      color: var(--muted);
+      text-align: center;
+      background: var(--card);
+      border-radius: 12px;
+      border: 1px dashed var(--border);
+    }
+    @media (max-width: 800px) {
+      .header { flex-direction: column; align-items: flex-start; }
+      .title { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <h2 class="title">My Bookings</h2>
+      <div class="header-actions">
+        <a class="secondary-link" href="{{ url_for('home') }}">Home</a>
+        <a class="primary-btn" href="{{ url_for('select_event') }}">Book new event</a>
+      </div>
+    </div>
+    <div class="breadcrumb"></div>
+
+    {% if bookings %}
+    <div class="panel">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Event</th>
+            <th>Event Date</th>
+            <th>Venue</th>
+            <th>Decoration</th>
+            <th class="num">Guest Count</th>
+            <th class="num">Total</th>
+            <th class="center">Payment</th>
+            <th class="center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for booking in bookings %}
+          <tr>
+            <td>#{{ booking.id }}</td>
+            <td><span class="badge event-strong">{{ booking.event_name }}</span></td>
+            <td>{{ booking.event_date or '-' }}</td>
+            <td>{{ booking.venue_name or '-' }}</td>
+            <td>{{ booking.decoration_theme or '-' }}</td>
+            <td class="num">{{ booking.guest_count or '-' }}</td>
+            <td class="num total-strong">₹{{ booking.total_amount or '-' }}</td>
+            <td class="center">
+              {% set status = (booking.payment_status or 'Pending') %}
+              <span class="status {{ 'paid' if status|lower == 'paid' else 'pending' }}">{{ status }}</span>
+            </td>
+            <td class="center">
+              <div class="actions">
+                <a class="btn info" href="{{ url_for('edit_booking', booking_id=booking.id) }}">Update</a>
+                <a class="btn warn" href="{{ url_for('update_food', booking_id=booking.id) }}">Update Food</a>
+                {% if booking.remaining_amount and booking.remaining_amount > 0 %}
+                <a class="btn warn" href="{{ url_for('payment_page', mode='remaining', booking_id=booking.id) }}">Pay Remaining</a>
+                {% endif %}
+                <form method="POST" action="{{ url_for('delete_booking', booking_id=booking.id) }}" onsubmit="return confirm('Delete this booking?');">
+                  <button type="submit" class="btn delete" title="Delete booking" aria-label="Delete booking">Delete</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty">No bookings found.</div>
+    {% endif %}
+  </div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/payment.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+
+<div class="container"
+     data-payment-status="{{ payment_status or '' }}"
+     data-remaining-amount="{{ remaining_amount if remaining_amount is not none else '' }}"
+     data-advance-amount="{{ advance_amount if advance_amount is not none else '' }}">
+
+    <h2>Payment Details</h2>
+
+    <!-- USER & EVENT DETAILS -->
+    <div class="card">
+        <h3>Booking Summary</h3>
+        <p><strong>Name:</strong> <span id="userName"></span></p>
+        <p><strong>Mobile:</strong> <span id="userMobile"></span></p>
+        <p><strong>Event:</strong> <span id="eventName"></span></p>
+        <p><strong>Venue:</strong> <span id="venue"></span></p>
+        <p><strong>Food Price:</strong> ₹<span id="foodPrice"></span></p>
+        <p><strong>Decoration Price:</strong> ₹<span id="decPrice"></span></p>
+        <p><strong>Service Charge (10%):</strong> ₹<span id="serviceCharge"></span></p>
+
+        <h3>Total Amount: ₹<span id="totalAmount"></span></h3>
+        <p><strong>Advance Amount (30%):</strong> ₹<span id="advanceAmount"></span></p>
+        <p><strong>Remaining Amount:</strong> ₹<span id="remainingAmount"></span></p>
+    </div>
+
+    <button id="payBtn" type="button">Now pay</button>
+
+    <p id="payingMode" class="note" style="margin-top:10px;"></p>
+    <p class="note">Note: After payment, your receipt will be downloaded automatically.</p>
+
+</div>
+
+<script src="{{ url_for('static', filename='Js/payment.js') }}"></script>
+
+</body>
+</html>

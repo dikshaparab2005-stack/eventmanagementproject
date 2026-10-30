@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Booking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/booking.css') }}">
+</head>
+<body>
+
+<div class="container">
+
+    <h2>Update Your Booking</h2>
+
+    <form id="updateBookingForm" method="POST" action="{{ url_for('update_booking') }}">
+        <input type="hidden" name="booking_id" id="updateBookingId" value="{{ session.get('current_booking_id', '') }}">
+
+        <label>Venue</label>
+        <input type="text" id="updateVenue" name="venue_name">
+
+        <label>Event Date</label>
+        <input type="date" id="updateEventDate" name="event_date">
+
+        <label>guest count</label>
+        <input type="number" id="updateguest_count" name="guest_count" min="10" max="10000">
+
+        <button id="saveUpdate" class="yellowBtn" type="submit">Save Changes</button>
+    </form>
+</div>
+
+<script src="{{ url_for('static', filename='Js/update_booking.js') }}"></script>
+<script>
+  (function () {
+    const dateInput = document.getElementById("updateEventDate");
+    if (!dateInput) return;
+    const now = new Date();
+    now.setDate(now.getDate() + 2);
+    const minDate = now.toISOString().split("T")[0];
+    dateInput.min = minDate;
+    if (dateInput.value && dateInput.value < minDate) {
+      dateInput.value = "";
+    }
+  })();
+</script>
+<script>
+  (function () {
+    const guestInput = document.getElementById("updateguest_count");
+    if (!guestInput) return;
+    const minGuests = 10;
+    const maxGuests = 10000;
+    guestInput.addEventListener("blur", () => {
+      const value = Number(guestInput.value);
+      if (!guestInput.value) {
+        guestInput.setCustomValidity("");
+        return;
+      }
+      if (!Number.isFinite(value) || value < minGuests || value > maxGuests) {
+        guestInput.setCustomValidity(`Guest count must be between ${minGuests} and ${maxGuests}.`);
+      } else {
+        guestInput.setCustomValidity("");
+      }
+    });
+  })();
+</script>
+
+</body>
+</html>

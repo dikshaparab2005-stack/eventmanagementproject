@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Karla:wght@300;400;600;700&family=Playfair+Display:wght@500;700&display=swap");
+        :root {
+            --bg: #0f172a;
+            --panel: #111827;
+            --card: #0b1220;
+            --accent: #f59e0b;
+            --accent-2: #38bdf8;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --border: rgba(148, 163, 184, 0.2);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: "Karla", sans-serif;
+            background: radial-gradient(circle at top left, #1f2937, #0f172a 45%);
+            color: var(--text);
+        }
+        .layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+        .sidebar {
+            background: linear-gradient(160deg, rgba(178, 6, 197, 0.532) 0%, rgb(190, 166, 190) 60%);
+            padding: 28px 18px;
+            border-right: 1px solid var(--border);
+        }
+        .brand {
+            font-family: "Playfair Display", serif;
+            font-size: 22px;
+            letter-spacing: 0.5px;
+            margin-bottom: 26px;
+        }
+        .nav a {
+            display: block;
+            color: var(--text);
+            text-decoration: none;
+            padding: 10px 12px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            transition: all 0.2s ease;
+        }
+        .nav a:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .nav a.active {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fef3c7;
+        }
+        .content {
+            padding: 32px;
+        }
+        .headline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .headline h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .headline p {
+            margin: 6px 0 0;
+            color: var(--muted);
+        }
+        .cta {
+            background: var(--accent);
+            color: #1f2937;
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-weight: 700;
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .card {
+            background: var(--card);
+            padding: 18px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        .card h3 {
+            margin: 0;
+            font-size: 16px;
+            color: var(--muted);
+        }
+        .count {
+            font-size: 30px;
+            font-weight: 700;
+            margin: 10px 0 0;
+        }
+        .table-wrap {
+            background: var(--panel);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            padding: 18px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px 10px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+        th {
+            color: var(--muted);
+            font-weight: 600;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(56, 189, 248, 0.2);
+            color: #bae6fd;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        .empty {
+            color: var(--muted);
+            padding: 12px 0;
+        }
+        @media (max-width: 900px) {
+            .layout { grid-template-columns: 1fr; }
+            .sidebar { position: sticky; top: 0; z-index: 2; }
+        }
+    </style>
+</head>
+<body>
+<div class="layout">
+    <aside class="sidebar">
+        <div class="brand">Event Admin</div>
+        <nav class="nav">
+            <a class="active" href="{{ url_for('admin.admin_dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('admin.manage_food') }}">Manage Food</a>
+            <a href="{{ url_for('admin.view_bookings') }}">Bookings</a>
+            <a href="{{ url_for('home') }}">Logout</a>
+        </nav>
+    </aside>
+
+    <main class="content">
+        <div class="headline">
+            <div>
+                <h1>Welcome back, Admin</h1>
+                <p>Here is a quick overview of activity and recent bookings.</p>
+            </div>
+            <a class="cta" href="{{ url_for('admin.view_bookings') }}">View All Bookings</a>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <h3>Food Items</h3>
+                <div class="count">{{ food_count }}</div>
+            </div>
+            <div class="card">
+                <h3>Bookings</h3>
+                <div class="count">{{ booking_count }}</div>
+            </div>
+            <div class="card">
+                <h3>Users</h3>
+                <div class="count">{{ user_count }}</div>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <h2 style="margin:0;">Recent Bookings</h2>
+            {% if recent_bookings %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Event</th>
+                        <th>Date</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in recent_bookings %}
+                    <tr>
+                        <td>#{{ booking.id }}</td>
+                        <td>
+                            <div>{{ booking.user_name }}</div>
+                            <div style="color:var(--muted); font-size:12px;">{{ booking.user_email }}</div>
+                        </td>
+                        <td><span class="badge">{{ booking.event_name }}</span></td>
+                        <td>{{ booking.booking_date }}</td>
+                        <td>{{ booking.items_count }}</td>
+                        <td>₹{{ booking.total }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty">No bookings yet.</div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+</body>
+</html>

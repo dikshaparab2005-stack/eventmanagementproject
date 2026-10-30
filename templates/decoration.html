@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Decoration Theme</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/decoration.css') }}">
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Decoration Themes</h1>
+        <p class="lead">Choose a theme and customize decoration details — preview, items and a live price estimate.</p>
+      </div>
+      <div class="muted">Event Management System </div>
+    </header>
+
+    <main>
+      <section class="themes-grid" id="themesGrid" aria-live="polite"></section>
+    </main>
+
+    <footer>Tip: click <strong>Select</strong> on any theme to open customization options and get an estimated price.</footer>
+  </div>
+
+  <!-- Modal -->
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" role="document" aria-labelledby="modalTitle">
+      <header>
+        <h2 id="modalTitle">Customize Decoration</h2>
+        <button class="btn ghost" id="closeBtn" type="button">Close</button>
+      </header>
+
+      <div class="modal-body">
+        <div class="modal-left">
+          <div class="thumb" id="modalThumb"></div>
+          <p id="modalDesc" class="muted" style="margin-top:8px"></p>
+
+          <div class="options-area">
+            <div class="form-row">
+              <label>Colour Theme</label>
+              <div class="options" id="colorOptions"></div>
+            </div>
+
+            <div class="form-row">
+              <label>Lighting Type</label>
+              <select id="lighting">
+                <option value="none" data-cost="0">None</option>
+                <option value="warm" data-cost="2000">Warm Lights (+₹2,000)</option>
+                <option value="led" data-cost="3500">LED Spotlights (+₹3,500)</option>
+                <option value="string" data-cost="1500">String Lights (+₹1,500)</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <label>Stage Decoration</label>
+              <div class="options" id="stageOptions"></div>
+            </div>
+
+            <div class="form-row">
+              <label>Flower Arrangements</label>
+              <div class="options" id="flowerOptions"></div>
+            </div>
+
+            <div class="form-row">
+              <label>Table & Seating</label>
+              <div class="options" id="tableOptions"></div>
+            </div>
+
+            <div class="form-row">
+              <label>Entry Gate</label>
+              <div class="options" id="entryOptions"></div>
+            </div>
+
+            <div class="form-row">
+              <label>Backdrop Style</label>
+              <div class="options" id="backdropOptions"></div>
+            </div>
+
+            <div class="form-row">
+              <label>Balloon / Fabric Décor</label>
+              <div class="options" id="balloonOptions"></div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="modal-right">
+          <div class="summary">
+            <h4>Summary</h4>
+            <div class="summary-row"><span class="muted">Theme</span><strong id="sumTheme">—</strong></div>
+            <div class="summary-row"><span class="muted">Base Price</span><span id="sumBase">₹0</span></div>
+            <div class="summary-row"><span class="muted">Extras</span><span id="sumExtras">₹0</span></div>
+            <div class="summary-row total-row"><strong>Total Estimate</strong><strong id="sumTotal">₹0</strong></div>
+            <div style="font-size:13px;margin-top:8px;color:var(--muted)">Note: This is an estimate. Final charge may vary.</div>
+
+            <div class="confirm">
+              <button class="btn primary" id="confirmBtn" type="button">Confirm Selection</button>
+              <button class="btn ghost" id="resetBtn" type="button">Reset</button>
+              <button class="btn" id="nextBtn" type="button">Next</button>
+            </div>
+
+            <div id="confirmationMessage" class="confirmation"></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='Js/decoration.js') }}"></script>
+</body>
+</html>

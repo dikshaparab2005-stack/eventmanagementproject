@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Receipt</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/demo_pdf.css') }}">
+</head>
+<body>
+
+<div class="receipt-box">
+
+    <div class="header">
+        <h2>EVENT BOOKING RECEIPT</h2>
+    </div>
+
+    <div class="section">
+        <h3>Customer Details</h3>
+        <p><strong>Name:</strong> <span id="rName"></span></p>
+        <p><strong>Mobile:</strong> <span id="rMobile"></span></p>
+    </div>
+
+    <div class="section">
+        <h3>Event Details</h3>
+        <p><strong>Event Name:</strong> <span id="rEvent"></span></p>
+        <p><strong>Venue:</strong> <span id="rVenue"></span></p>
+    </div>
+
+    <div class="section price">
+        <h3>Price Breakdown</h3>
+        <p><strong>Food Price:</strong> ₹<span id="rFood"></span></p>
+        <p><strong>Decoration Price:</strong> ₹<span id="rDec"></span></p>
+        <p><strong>Service Charge:</strong> ₹<span id="rService"></span></p>
+        <p><strong>Total Amount:</strong> ₹<span id="rTotal"></span></p>
+        <p><strong>Advance Paid:</strong> ₹<span id="rAdvance"></span></p>
+        <p><strong>Remaining Amount:</strong> ₹<span id="rRemaining"></span></p>
+        <p><strong>Transaction ID:</strong> <span id="rTxn"></span></p>
+        <p><strong>Status:</strong> <span id="rStatus"></span></p>
+    </div>
+
+    <div class="total">
+        <h2>Amount Paid: ₹<span id="rPaid"></span></h2>
+    </div>
+
+    <div class="footer">
+        <p>Thank you for booking with us!</p>
+    </div>
+
+    <div style="text-align:center; margin-top: 16px;">
+        <button id="downloadPdf" style="background:#1f7a1f; color:#fff; border:none; padding:10px 16px; border-radius:4px; cursor:pointer;">Download PDF</button>
+        <button type="button" onclick="window.location.href='{{ url_for('home') }}'" style="margin-left:12px; background:#4a5568; color:#fff; border:none; padding:10px 16px; border-radius:4px; cursor:pointer;">Back</button>
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="{{ url_for('static', filename='Js/dem0_pdf.js') }}"></script>
+</body>
+</html>

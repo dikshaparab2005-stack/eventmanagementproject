@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/venu.css') }}">
+</head>
+<body>
+        <button id="nextBtn"class="nextBtn">Next</button>
+
+    <div class="container">
+        <h1>Add Event Venue</h1>
+        <form id="venue-form">
+            <div class="form-group">
+                <label for="venue-name">Venue Name:</label>
+                <input type="text" id="venue-name" required>
+            </div>
+            <div class="form-group">
+                <label for="venue-location">Location:</label>
+                <input type="text" id="venue-location" required>
+            </div>
+            <div class="form-group">
+                <label for="venue-capacity">Capacity:</label>
+                <input type="number" id="venue-capacity" min="1">
+            </div>
+            <button type="submit" class="btn">Add Venue</button>
+        </form>
+
+        <div class="venue-list-container">
+            <div id="venues-output">
+                <!-- Venue details will be displayed here dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='Js/venu.js') }}"></script>
+</body>
+</html>
